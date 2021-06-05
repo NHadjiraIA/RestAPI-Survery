@@ -248,12 +248,15 @@ def remove_planet():
 ###############Question 
 @app.route('/question', methods=["GET"])
 def question():
-    id = request.args.get('id')
+    id = request.args.get('id_question')
     print(id)
     if id:
+        print('helloooooooooo')
         question = Context.question_repository.get_by_id(id)
         if question:
-            return Question_schema.dump(question)
+             
+            result = QuestionDtos_Schema.dump(question)
+            return jsonify(result)
         else:
             return jsonify(message='question not found'), 404
     else:
@@ -384,6 +387,12 @@ class QuestionResponsesDtoSchema(ma.Schema):
     class Meta:
         #'content_chosen_answer','id_question',
         fields = ('id_question','id_field','id_chosen_answer','content_chosen_answer','id_response','content_question')
+
+
+class QuestionDtoSchema(ma.Schema):
+    class Meta:
+        #'content_chosen_answer','id_question',
+        fields = ('id_question','content_question')
 # instantiate UserSchema (deserialize a single object)
 User_schema = UserSchema()
 Users_schema = UserSchema(many=True)
@@ -405,6 +414,8 @@ Responses_Schema = Responsechema(many=True)
 Response_Schema = Responsechema()
 QuestionResponseDtos_Schema =QuestionResponsesDtoSchema(many=True)
 QuestionResponseDto_Schema =QuestionResponsesDtoSchema()
+QuestionDtos_Schema =QuestionResponsesDtoSchema(many=True)
+QuestionDto_Schema =QuestionResponsesDtoSchema()
 SubQuestion_Schema = SubQuestionSchema()
 SubQuestions_Schema = SubQuestionSchema(many=True)
 Survey_Schema = SurveySechema(many=True)

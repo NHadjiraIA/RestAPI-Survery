@@ -15,7 +15,8 @@ class QuestionRepository(repository_base.RepositoryBase):
 
     def get_by_id(self, id):
         try:
-            return self.session().query(Question).filter_by(id_question=id).one()
+            return self.session().query(Question) \
+                .filter(Question.id_question == id)
         except:
             return None
 
