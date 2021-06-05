@@ -12,6 +12,7 @@ from infrastructure.repositories import question_response_repository
 from infrastructure.repositories import response_repository
 # from infrastructure.repositories import question_response_user_repository
 from infrastructure.repositories import report_repository
+from infrastructure.repositories import sub_question_repository
 from presentation import register_filters
 
 class SQLContext(object):
@@ -34,6 +35,7 @@ class SQLContext(object):
         self.response_repository = response_repository.ResponseRepository(app, db)
         #self.question_response_user_repository = question_response_user_repository(app, db)
         self.report_repository = report_repository.ReportRepository(app,db)
+        self.sub_question_repository = sub_question_repository.SubQuestionRepository(app,db)
         register_filters(app)
 
     def setup(self):

@@ -112,6 +112,7 @@ def init(db):
                             db.Column('content_chosen_answer', db.String(50)),
                             db.Column('title_chosen_answer', db.String(50)),
                             db.Column('id_response',db.Integer,db.ForeignKey('responses.id_response'))
+                            
 
     )
     question_response_user_mapping = db.Table('questionsResponseUser',    
@@ -127,7 +128,8 @@ def init(db):
                             db.Column('id_report',db.Integer,primary_key=True),
                             db.Column('title_report', db.String(50)),
                             db.Column('content_report', db.String(50)),
-                            db.Column('date_report', db.Date)
+                            db.Column('date_report', db.Date),
+                            db.Column('id_user',db.Integer,db.ForeignKey('users.id_user'))
                              )
     db.mapper(User, user_mapping)
     db.mapper(Planet, planet_mapping)   

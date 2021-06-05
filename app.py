@@ -20,6 +20,7 @@ from domain.entities.chosen_answer import ChosenAnswer
 from domain.entities.report import Report
 from domain.entities.response import Response
 from domain.entities.survey import Survey
+from domain.entities.sub_question import SubQuestion
 app = Flask(__name__)
 app.config.from_object(Config)
 Context = app.config["CONTEXT_FACTORY"](app)
@@ -268,10 +269,11 @@ def question():
 @app.route('/retrieve_response', methods=['GET'])
 def retrieve_response():
     id_question = request.args.get('id_question')
+    id_chosen_answer = request.args.get('id_chosen_answer')
 
-    if id_question:
+    if id_question and id_chosen_answer:
          
-        response = Context.response_repository.get_by_question_id(id_question)
+        response = Context.sub_question_repository.get_by_question_response_chosed(id_question,id_chosen_answer)
          
         if response:
             result = QuestionResponseDtos_Schema.dump(response)
@@ -279,7 +281,7 @@ def retrieve_response():
         else:
             return jsonify(message="That response doesn't exist"), 404
     else:
-        Response_list = Context.response_repository.get_all() 
+        Response_list = Context.sub_question_repository.get_all() 
         print(Response_list)
         result = Responses_Schema.dump(Response_list)
         if result:
@@ -368,11 +370,11 @@ class SubQuestionSchema(ma.Schema):
 
 class ReportSchema(ma.Schema):
     class Meta:
-        fields = ( 'id_report','title_report', 'content_report', 'date_report')           
+        fields = ( 'id_report','title_report', 'content_report', 'date_report','id_user')           
 
 class Responsechema(ma.Schema):
     class Meta:
-        fields = ( 'id_response', 'content_response') 
+        fields = ( 'id_response','id_field', 'content_question','id_question','level') 
 
 class SurveySechema(ma.Schema):
     class Meta:
@@ -380,7 +382,8 @@ class SurveySechema(ma.Schema):
 
 class QuestionResponsesDtoSchema(ma.Schema):
     class Meta:
-        fields = ('id_response', 'content_response')
+        #'content_chosen_answer','id_question',
+        fields = ('id_question','id_field','id_chosen_answer','content_chosen_answer','id_response','content_question')
 # instantiate UserSchema (deserialize a single object)
 User_schema = UserSchema()
 Users_schema = UserSchema(many=True)
