@@ -1,3 +1,4 @@
+from application.extensions.dtoExtensions import questionResponsesToNextQuestionDto
 from domain.entities.sub_question import SubQuestion
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +8,7 @@ from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_mail import Mail, Message
 from flask_cors import CORS
-
+from  application.extensions import *
 from domain.entities.user import User
 from domain.entities.planet import Planet
 from domain.entities.question import Question
@@ -269,18 +270,18 @@ def question():
         
 
  ###### response of question 
-@app.route('/retrieve_response', methods=['GET'])
-def retrieve_response():
+@app.route('/api/v1/questions/next', methods=['GET'])
+def next_question():
     id_question = request.args.get('id_question')
     id_chosen_answer = request.args.get('id_chosen_answer')
+    id_field = request.args.get('id_field')
+    
 
     if id_question and id_chosen_answer:
-         
-        response = Context.sub_question_repository.get_by_question_response_chosed(id_question,id_chosen_answer)
-         
+        response = Context.sub_question_repository.get_by_question_response_chosed(id_question,id_chosen_answer,id_field)
         if response:
-            result = QuestionResponseDtos_Schema.dump(response)
-            return jsonify(result)
+            nextQuestionDto  = questionResponsesToNextQuestionDto(response)
+            return jsonify(nextQuestionDto)
         else:
             return jsonify(message="That response doesn't exist"), 404
     else:
@@ -349,7 +350,7 @@ class ExempleSchema(ma.Schema):
 
 class FieldSchema(ma.Schema):
     class Meta:
-        fields = ('id_field', 'name_field')        
+        fields = ('id_field', 'name_field','id_question')        
  
 # class QuestionFieldSchema(ma.Schema):
 #     class Meta:

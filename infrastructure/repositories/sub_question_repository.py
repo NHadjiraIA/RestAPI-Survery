@@ -26,14 +26,14 @@ class SubQuestionRepository(repository_base.RepositoryBase):
             return self.session().query(SubQuestion).filter_by(id_field=id).one()
         except:
             return None
-    def get_by_question_response_chosed(self,id_question,id_chosen_answer):
+    def get_by_question_response_chosed(self,id_question,id_chosen_answer,id_field):
         try:
            
           result = self.session().query(SubQuestion.id_field, ChosenAnswer.content_chosen_answer,Question.id_question,SubQuestion.id_response,Question.content_question,ChosenAnswer.id_chosen_answer).distinct()\
                   .join(Question, Question.id_question == SubQuestion.id_question )\
                   .join(Response, Question.id_response == Response.id_response) \
                   .join(ChosenAnswer, Response.id_response == ChosenAnswer.id_response)\
-                  .filter(and_(SubQuestion.id_sub_question == id_question ,SubQuestion.id_chosen_answer == id_chosen_answer ,SubQuestion.id_question != SubQuestion.id_sub_question ))
+                  .filter(and_(SubQuestion.id_sub_question == id_question ,SubQuestion.id_chosen_answer == id_chosen_answer,SubQuestion.id_field == id_field ,SubQuestion.id_question != SubQuestion.id_sub_question ))
            
           return result
            

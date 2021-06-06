@@ -84,8 +84,9 @@ def init(db):
                              
     field_mapping = db.Table('fields',
                              db.Column('id_field', db.Integer, primary_key=True),
-                             db.Column('name_field', db.String(50))
-                             )                         
+                             db.Column('name_field', db.String(50)),
+                             db.Column('id_question',db.Integer,db.ForeignKey('questions.id_question'))
+                            )                         
        
     question_response_mapping = db.Table('questions_response',
                             db.Column('id_question',db.Integer,db.ForeignKey('questions.id_question'), primary_key=True),
