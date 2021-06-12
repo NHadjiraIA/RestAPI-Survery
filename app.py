@@ -277,13 +277,13 @@ def next_question():
     id_field = request.args.get('id_field')
     
 
-    if id_question and id_chosen_answer:
+    if id_question and id_chosen_answer and id_field:
         response = Context.sub_question_repository.get_by_question_response_chosed(id_question,id_chosen_answer,id_field)
         if response:
             nextQuestionDto  = questionResponsesToNextQuestionDto(response)
             return jsonify(nextQuestionDto)
         else:
-            return jsonify(message="That response doesn't exist"), 404
+            return jsonify(message="This is the last question"), 404
     else:
         Response_list = Context.sub_question_repository.get_all() 
         print(Response_list)
@@ -292,28 +292,19 @@ def next_question():
             return jsonify(result)
         return jsonify(), 204    
 
-
-#######################response question 
-# @app.route('/response_question', methods=['GET'])
-# def response_question():
-#     id_question = request.args.get('id_question')
-    
-    
-#     if id_question:
-         
-#         response = Context.question_response_repository.get_by_id_question(id_question)
-         
-#         if response:
-#            # return QuestionResponse_Schema.dump(response)
-#         else:
-#             return jsonify(message="That response doesn't exist"), 404
-#     else:
-#         Response_list = Context.question_response_repository.get_all() 
-#         print(Response_list)
-#         # #result = QuestionResponses_Schema.dump(Response_list)
-#         # if result:
-#         #     return jsonify(result)
-#         # return jsonify(), 204                  
+###### response of question 
+@app.route('/api/v1/questions/<id>', methods=['GET'])
+def get_question(id):
+    if id:
+        response = Context.question_repository.get_by_id(id)
+        if response:
+            questionDto  = questionResponsesToNextQuestionDto(response)
+            return jsonify(questionDto)
+        else:
+            return jsonify(message="That question doesn't exist"), 404  
+    else:
+        return jsonify(message="id of the question is required !")
+                  
 # ###############Fields
 @app.route('/fields', methods=["GET"])
 def field():

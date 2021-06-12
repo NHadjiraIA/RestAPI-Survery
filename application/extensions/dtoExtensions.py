@@ -14,3 +14,18 @@ def questionResponsesToNextQuestionDto(questionResponseChoices):
   }
   return nextQuestionDto
 
+def questionResponsesToFirstQuestionOfFieldDto(firstQuestionResponseField):
+  responseFirstQuestionField = []
+  for firstQuestionField in firstQuestionResponseField:
+    responseFirstQuestionField.append({
+      "idResponse": firstQuestionField.id_response,
+      "idResponseChoice": firstQuestionField.id_chosen_answer,
+      "title": firstQuestionField.content_chosen_answer
+    })
+  firstQuestionFieldDto = {
+    "id" : firstQuestionResponseField[0].id_field,
+    "title" : firstQuestionResponseField[0].name_field,
+    "responseChoicesFirstQuestion": responseFirstQuestionField
+  }
+  return firstQuestionFieldDto
+
