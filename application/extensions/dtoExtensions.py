@@ -1,5 +1,8 @@
 
 def questionResponsesToNextQuestionDto(questionResponseChoices):
+  if questionResponseChoices.count() == 0:
+    return None
+
   responseChoices = []
   for responseChoice in questionResponseChoices:
     responseChoices.append({

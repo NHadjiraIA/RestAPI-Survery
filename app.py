@@ -279,6 +279,7 @@ def next_question():
 
     if id_question and id_chosen_answer and id_field:
         response = Context.sub_question_repository.get_by_question_response_chosed(id_question,id_chosen_answer,id_field)
+        
         if response:
             nextQuestionDto  = questionResponsesToNextQuestionDto(response)
             return jsonify(nextQuestionDto)
