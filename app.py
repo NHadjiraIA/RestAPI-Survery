@@ -1,8 +1,9 @@
-from application.extensions.dtoExtensions import questionResponsesToNextQuestionDto
+from application.extensions.dtoExtensions import questionResponsesToNextQuestionDto, questionResponsesOfUserDto
 from domain.entities.sub_question import SubQuestion
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow.fields import Integer
+from datetime import datetime
 from Config import *
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
@@ -16,7 +17,7 @@ from domain.entities.exemple import Exemple
 from domain.entities.field import Field
 from domain.entities.chosen_answer import ChosenAnswer
 # from domain.entities.question_field import QuestionField
-# from domain.entities.question_response_user import QuestionResponseUser
+from domain.entities.question_response_user import QuestionResponseUser
 # from domain.entities.question_survey import QuestionSurvey
 from domain.entities.report import Report
 from domain.entities.response import Response
@@ -76,26 +77,30 @@ def users():
         return jsonify(result)
     return  jsonify(), 204
 
-############## Add user#########
-@app.route('/adduser', methods=['POST'])
+############## Add user######### 
+@app.route('/api/v1/users', methods=['POST'])
 def adduser():
-    email = request.form['email']
-    if email:
-        user = Context.user_repository.get_by_email(email)
+    body = request.json
+    email_user = body['email_user']
+    if email_user:
+        user = Context.user_repository.get_by_email(email_user)
         if user:
             return jsonify(message='That email already exists.'), 409
         else:
-            first_name = request.form['first_name']
-            last_name = request.form['last_name']
-            password = request.form['password']
-            user = User(first_name=first_name, last_name=last_name, email=email, password=password)
+            id_user = body['id_user']
+            first_name_user = body['first_name_user']
+            last_name_user = body['last_name_user']
+            password_user= body['password_user']
+            user = User(id_user=id_user, first_name_user=first_name_user, last_name_user=last_name_user, email_user=email_user, password_user=password_user)
             Context.user_repository.create(user)
-            useradded = Context.user_repository.get_by_email(email)
+            useradded = Context.user_repository.get_by_email(email_user)
             if useradded:
                 return jsonify(message='User created sucessfuly.'), 201
             else:
                 return jsonify(message='We could not creat user')
     return jsonify(message='email is required'), 400
+
+    
 
 # #############update
 @app.route('/update_user', methods=['PUT'])
@@ -306,6 +311,30 @@ def get_question(id):
     else:
         return jsonify(message="id of the question is required !")
                   
+
+ ###### previous  question 
+@app.route('/api/v1/questions/previous', methods=['GET'])
+def previous_question():
+    id_question = request.args.get('id_question')    
+    id_field = request.args.get('id_field')
+    
+
+    if id_question and id_field:
+        response = Context.sub_question_repository.get_previous_question_by_response_chosed(id_question,id_field)
+        
+        if response:
+            previousQuestionDto  = questionResponsesToNextQuestionDto(response)
+            return jsonify(previousQuestionDto)
+        else:
+            return jsonify(message="This is the last question"), 404
+    else:
+        Response_list = Context.sub_question_repository.get_all() 
+        print(Response_list)
+        result = Responses_Schema.dump(Response_list)
+        if result:
+            return jsonify(result)
+        return jsonify(), 204    
+
 # ###############Fields
 @app.route('/fields', methods=["GET"])
 def field():
@@ -324,6 +353,65 @@ def field():
         if result:
             return jsonify(result)
         return jsonify(), 204
+# ############################ add response of user         
+@app.route('/api/v1/response/user', methods=['POST'])
+def responseuser():
+    body = request.json
+    fieldId = body['id_field']
+    userId = body['id_user']
+    questionId = body['id_question']
+    answerChosenId = body['id_chosen_answer']
+    field = Context.field_repository.get_by_id(fieldId)
+    user = Context.user_repository.get_by_id(userId)
+    if user:
+        if field:
+            questionField = Context.sub_question_repository.get_question_by_field(fieldId,questionId)
+            if questionField:
+                answerChosen = Context.question_response_repository.get_answerChosen_by_question(questionId,answerChosenId)
+                if answerChosen:
+                    responseuser = Context.question_response_user_repository.get_response_by_user_question_answer_chosen(userId,questionId,answerChosenId)
+                    if responseuser:
+                        return jsonify(message='That response  already exists.'), 409
+                    else:
+                        id_question_response_user = body['id_question_response_user']
+                        id_response = body['id_response']                         
+                        currentDateTime = datetime.now()                         
+                        responseuser = QuestionResponseUser(id_question_response_user=id_question_response_user,id_question=questionId,id_response=id_response, id_user=userId, id_chosen_answer=answerChosenId,datetime_response=currentDateTime)
+                        print('responseuser is')
+                        print(responseuser)
+                        Context.question_response_user_repository.create(responseuser)
+                        responseuseradded = Context.question_response_user_repository.get_response_by_user_question_answer_chosen(userId,questionId,answerChosenId)
+                        if responseuseradded:
+                            return jsonify(message='response user created sucessfuly.'), 201
+                        else:
+                            return jsonify(message='We could not creat user')
+                return jsonify(message="this response is not a answer of this question"), 400         
+            return jsonify(message="this question didn't exist in this field"), 400            
+        return jsonify(message="field didn't exist"), 400
+    return jsonify(message="user didn't exist"), 400
+
+# ##################display message report
+@app.route('/api/v1/raport/messages', methods=['GET'])
+def report_message():
+    id_user = request.args.get('id_user')
+    id_field = request.args.get('id_field')
+    
+
+    if id_user and id_field:
+        response = Context.question_response_user_repository.get_message_by_response_user(id_user,id_field)
+        print(response)
+        if response:
+            messageReportUserDto  = questionResponsesOfUserDto(response)
+            return jsonify(messageReportUserDto)
+        else:
+            return jsonify(message="This is not a response for this user on this field"), 404
+    else:
+        Response_list = Context.question_response_user_repository.get_all() 
+        print(Response_list)
+        result = Responses_Schema.dump(Response_list)
+        if result:
+            return jsonify(result)
+        return jsonify(), 204    
 # batabase models
 class UserSchema(ma.Schema):
     class Meta:

@@ -6,4 +6,4 @@ class User(object):
         self.last_name_user = last_name_user
         self.email_user = email_user
         self.password_user = password_user
-        self.id_report = id_report
+                 

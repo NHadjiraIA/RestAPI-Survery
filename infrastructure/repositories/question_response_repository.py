@@ -1,4 +1,7 @@
+from domain.entities.chosen_answer import ChosenAnswer
+from domain.entities.question import Question
 from domain.entities.response import Response
+from sqlalchemy import and_
 import sys
 import json
 #from domain.entities.question_response import QuestionResponse
@@ -28,6 +31,16 @@ class QuestionResponseRepository(repository_base.RepositoryBase):
            return None
         except:
             return None
+    def get_answerChosen_by_question(self, id_question,id_chosen_answer):
+        try:
+           result = self.session().query(Question.id_question, ChosenAnswer.id_chosen_answer).distinct()\
+                  .join(Response, Question.id_response == Response.id_response )\
+                  .join(ChosenAnswer, Response.id_response == ChosenAnswer.id_response)\
+                  .filter(and_(Question.id_question == id_question ,ChosenAnswer.id_chosen_answer == id_chosen_answer))
+             
+           return result
+        except:
+            return None        
             
 
 

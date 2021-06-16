@@ -29,7 +29,7 @@ class SubQuestionRepository(repository_base.RepositoryBase):
     def get_by_question_response_chosed(self,id_question,id_chosen_answer,id_field):
         try:
            
-          result = self.session().query(SubQuestion.id_field, ChosenAnswer.content_chosen_answer,Question.id_question,SubQuestion.id_response,Question.content_question,ChosenAnswer.id_chosen_answer).distinct()\
+          result = self.session().query(SubQuestion.id_field, ChosenAnswer.content_chosen_answer,Question.id_question,SubQuestion.id_response,Question.content_question,ChosenAnswer.id_chosen_answer, SubQuestion.level).distinct()\
                   .join(Question, Question.id_question == SubQuestion.id_question )\
                   .join(Response, Question.id_response == Response.id_response) \
                   .join(ChosenAnswer, Response.id_response == ChosenAnswer.id_response)\
@@ -38,7 +38,31 @@ class SubQuestionRepository(repository_base.RepositoryBase):
           return result
            
         except:
-            return None    
+            return None   
+
+    def get_previous_question_by_response_chosed(self,id_question,id_field):
+        try:
+           
+          result = self.session().query(SubQuestion.id_field, ChosenAnswer.content_chosen_answer,Question.id_question,SubQuestion.id_response,Question.content_question,ChosenAnswer.id_chosen_answer,SubQuestion.level).distinct()\
+                  .join(Question, Question.id_question == SubQuestion.id_sub_question )\
+                  .join(Response, Question.id_response == Response.id_response) \
+                  .join(ChosenAnswer, Response.id_response == ChosenAnswer.id_response)\
+                  .filter(and_(SubQuestion.id_question == id_question ,SubQuestion.id_chosen_answer != 42,SubQuestion.id_field == id_field))
+           
+          return result
+           
+        except:
+            return None  
+
+    def get_question_by_field(self,id_question,id_field):
+        try:
+           
+            result = self.session().query(SubQuestion.id_field,SubQuestion.id_question).distinct()\
+                   .filter(and_(SubQuestion.id_question == id_question ,SubQuestion.id_field == id_field))
+            return result
+        except:
+            return None   
+
     def get_by_content(self, content):
         try:
             return self.session().query(Response).filter_by(content_response=content).all()

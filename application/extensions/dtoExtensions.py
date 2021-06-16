@@ -2,7 +2,7 @@
 def questionResponsesToNextQuestionDto(questionResponseChoices):
   if questionResponseChoices.count() == 0:
     return None
-
+    
   responseChoices = []
   for responseChoice in questionResponseChoices:
     responseChoices.append({
@@ -13,9 +13,29 @@ def questionResponsesToNextQuestionDto(questionResponseChoices):
   nextQuestionDto = {
     "id" : questionResponseChoices[0].id_question,
     "title" : questionResponseChoices[0].content_question,
+    "level" : questionResponseChoices[0].level,
     "responseChoices": responseChoices
   }
   return nextQuestionDto
+
+def questionResponsesOfUserDto(questionResponseChoicesReport):
+  if questionResponseChoicesReport.count() == 0:
+    return None
+    
+  responseChoicesReport = []
+  for responseChoiceReport in questionResponseChoicesReport:
+    responseChoicesReport.append({
+      "idResponse": responseChoiceReport.id_response,
+      "idResponseChoice": responseChoiceReport.id_chosen_answer,
+      "message": responseChoiceReport.message
+    })
+  messageReportUserDto = {
+    "firstName" : questionResponseChoicesReport[0].first_name_user,
+    "lastName" : questionResponseChoicesReport[0].last_name_user,
+    "date" : questionResponseChoicesReport[0].datetime_response,
+    "messageReport": responseChoicesReport
+  }
+  return messageReportUserDto  
 
 def questionResponsesToFirstQuestionOfFieldDto(firstQuestionResponseField):
   responseFirstQuestionField = []

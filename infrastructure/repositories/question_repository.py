@@ -1,3 +1,4 @@
+from domain.entities.sub_question import SubQuestion
 import sys
 from domain.entities.response import Response
 from domain.entities.chosen_answer import ChosenAnswer
@@ -18,10 +19,11 @@ class QuestionRepository(repository_base.RepositoryBase):
 
     def get_by_id(self, id):
         try:
-            result = self.session().query(Question.id_response, ChosenAnswer.content_chosen_answer,Question.id_question,Question.content_question,ChosenAnswer.id_chosen_answer).distinct()\
+            result = self.session().query(Question.id_response, ChosenAnswer.content_chosen_answer,Question.id_question,Question.content_question,ChosenAnswer.id_chosen_answer,SubQuestion.level).distinct()\
                   .join(Response, Question.id_response == Response.id_response) \
                   .join(ChosenAnswer, Response.id_response == ChosenAnswer.id_response)\
-                  .filter(Question.id_question == id)
+                  .join(SubQuestion, Question.id_question == SubQuestion.id_question) \
+                  .filter(and_(Question.id_question == id, SubQuestion.id_question == SubQuestion.id_sub_question))
 
             return result
         except:

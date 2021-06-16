@@ -1,4 +1,5 @@
-#from sqlalchemy.sql.sqltypes import DateTime
+from datetime import datetime
+from sqlalchemy.sql.sqltypes import DateTime
 from infrastructure.repositories.report_repository import ReportRepository
 from domain.entities.question_response_user import QuestionResponseUser
 from infrastructure.repositories.question_field_repository import QuestionFieldRepository
@@ -112,6 +113,7 @@ def init(db):
                             db.Column('id_chosen_answer',db.Integer,primary_key=True),
                             db.Column('content_chosen_answer', db.String(50)),
                             db.Column('title_chosen_answer', db.String(50)),
+                            db.Column('message', db.String(50)),
                             db.Column('id_response',db.Integer,db.ForeignKey('responses.id_response'))
                             
 
@@ -122,8 +124,7 @@ def init(db):
                             db.Column('id_response',db.Integer,db.ForeignKey('responses.id_response')),
                             db.Column('id_user',db.Integer,db.ForeignKey('users.id_user')),
                             db.Column('id_chosen_answer',db.Integer,db.ForeignKey('chosenAnswers.id_chosen_answer')),
-                            db.Column('date_reponse', db.Date),
-                            db.Column('hour_response', db.DateTime)
+                            db.Column('datetime_response', db.DateTime)
                             ) 
     report_mapping = db.Table('reports',
                             db.Column('id_report',db.Integer,primary_key=True),

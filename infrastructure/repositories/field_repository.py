@@ -13,7 +13,7 @@ class FieldRepository(repository_base.RepositoryBase):
         except:
             return None
 
-    def get_by_id(self, id):
+    def get_by_id_first_question(self, id):
         try:
             return self.session().query(Field).filter_by(id_field=id).one()
         except:
@@ -24,6 +24,11 @@ class FieldRepository(repository_base.RepositoryBase):
             return self.session().query(Field).filter_by(name_field=name).one()
         except:
             return None
+    def get_by_id(self, id):
+        try:
+            return self.session().query(Field).filter_by(id_field=id).one()
+        except:
+            return None        
 
     def Update(self, item):
         try:
