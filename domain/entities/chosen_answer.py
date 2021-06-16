@@ -4,4 +4,4 @@ class ChosenAnswer(object):
         self.id_response = id_response
         self.content_chosen_answer = content_chosen_answer
         self.title_chosen_answer = title_chosen_answer
-        self,message = message
+        self.message = message
