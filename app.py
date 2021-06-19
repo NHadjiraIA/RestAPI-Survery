@@ -87,11 +87,11 @@ def adduser():
         if user:
             return jsonify(message='That email already exists.'), 409
         else:
-            id_user = body['id_user']
+             
             first_name_user = body['first_name_user']
             last_name_user = body['last_name_user']
             password_user= body['password_user']
-            user = User(id_user=id_user, first_name_user=first_name_user, last_name_user=last_name_user, email_user=email_user, password_user=password_user)
+            user = User( first_name_user=first_name_user, last_name_user=last_name_user, email_user=email_user, password_user=password_user)
             Context.user_repository.create(user)
             useradded = Context.user_repository.get_by_email(email_user)
             if useradded:
@@ -257,7 +257,6 @@ def question():
     id = request.args.get('id_question')
     print(id)
     if id:
-        print('helloooooooooo')
         question = Context.question_repository.get_by_id(id)
         if question:
              
@@ -361,6 +360,7 @@ def responseuser():
     userId = body['id_user']
     questionId = body['id_question']
     answerChosenId = body['id_chosen_answer']
+    codeUserResponse = body['code_user_response']
     field = Context.field_repository.get_by_id(fieldId)
     user = Context.user_repository.get_by_id(userId)
     if user:
@@ -368,19 +368,19 @@ def responseuser():
             questionField = Context.sub_question_repository.get_question_by_field(fieldId,questionId)
             if questionField:
                 answerChosen = Context.question_response_repository.get_answerChosen_by_question(questionId,answerChosenId)
-                if answerChosen:
-                    responseuser = Context.question_response_user_repository.get_response_by_user_question_answer_chosen(userId,questionId,answerChosenId)
+                if answerChosen and codeUserResponse:
+                    print(codeUserResponse)
+                    responseuser = Context.question_response_user_repository.get_response_by_user_question_answer_chosen(userId,questionId,answerChosenId,codeUserResponse)
                     if responseuser:
                         return jsonify(message='That response  already exists.'), 409
                     else:
-                        id_question_response_user = body['id_question_response_user']
-                        id_response = body['id_response']                         
+                                              
                         currentDateTime = datetime.now()                         
-                        responseuser = QuestionResponseUser(id_question_response_user=id_question_response_user,id_question=questionId,id_response=id_response, id_user=userId, id_chosen_answer=answerChosenId,datetime_response=currentDateTime)
+                        responseuser = QuestionResponseUser(code_user_response=codeUserResponse,id_user=userId,id_question=questionId,id_field= fieldId,id_chosen_answer=answerChosenId,datetime_response=currentDateTime)
                         print('responseuser is')
                         print(responseuser)
                         Context.question_response_user_repository.create(responseuser)
-                        responseuseradded = Context.question_response_user_repository.get_response_by_user_question_answer_chosen(userId,questionId,answerChosenId)
+                        responseuseradded = Context.question_response_user_repository.get_response_by_user_question_answer_chosen(userId,questionId,answerChosenId,codeUserResponse)
                         if responseuseradded:
                             return jsonify(message='response user created sucessfuly.'), 201
                         else:

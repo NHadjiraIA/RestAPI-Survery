@@ -17,10 +17,10 @@ class QuestionResponseUserRepository(repository_base.RepositoryBase):
         except:
             return None
 
-    def get_response_by_user_question_answer_chosen(self, id_user,id_question,id_chosen_answer):
+    def get_response_by_user_question_answer_chosen(self, id_user,id_question,id_chosen_answer,code_user_response):
         try:
             result= self.session().query(QuestionResponseUser)\
-                .filter(and_(QuestionResponseUser.id_question == id_question ,QuestionResponseUser.id_chosen_answer == id_chosen_answer,QuestionResponseUser.id_user == id_user))
+                .filter(and_(QuestionResponseUser.id_question == id_question ,QuestionResponseUser.id_chosen_answer == id_chosen_answer,QuestionResponseUser.id_user == id_user,QuestionResponseUser.code_user_response==code_user_response))
             print('This is the result')
             print(result.count())
             if(result.count() == 0):
@@ -38,7 +38,7 @@ class QuestionResponseUserRepository(repository_base.RepositoryBase):
                   .join(SubQuestion, SubQuestion.id_question == QuestionResponseUser.id_question)\
                   .join(Field, Field.id_field == SubQuestion.id_field)\
                   .filter(and_(User.id_user == id_user ,Field.id_field == id_field))\
-                  .group_by(QuestionResponseUser.id_response)
+                  .group_by(QuestionResponseUser.id_question)
            
             return result
         except:

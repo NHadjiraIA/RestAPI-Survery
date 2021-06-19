@@ -24,8 +24,7 @@ def questionResponsesOfUserDto(questionResponseChoicesReport):
     
   responseChoicesReport = []
   for responseChoiceReport in questionResponseChoicesReport:
-    responseChoicesReport.append({
-      "idResponse": responseChoiceReport.id_response,
+    responseChoicesReport.append({ 
       "idResponseChoice": responseChoiceReport.id_chosen_answer,
       "message": responseChoiceReport.message
     })

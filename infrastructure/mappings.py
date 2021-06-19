@@ -21,7 +21,7 @@ from domain.entities.question_response_user import QuestionResponseUser
  
 def init(db):
     user_mapping = db.Table('users',
-                            db.Column('id_user', db.Integer, primary_key=True),
+                            db.Column('id_user', db.Integer, primary_key=True, autoincrement=True),
                             db.Column('first_name_user', db.String(50)),
                             db.Column('last_name_user', db.String(50)),
                             db.Column('email_user', db.String(100)),
@@ -119,9 +119,9 @@ def init(db):
 
     )
     question_response_user_mapping = db.Table('questionsResponseUser',    
-                            db.Column('id_question_response_user',db.Integer,primary_key=True),                            
-                            db.Column('id_question',db.Integer,db.ForeignKey('questions.id_question')),
-                            db.Column('id_response',db.Integer,db.ForeignKey('responses.id_response')),
+                            db.Column('id_question_response_user',db.Integer,primary_key=True,autoincrement=True), 
+                            db.Column('code_user_response',db.String(50),primary_key=True,unique=True),                             
+                            db.Column('id_question',db.Integer,db.ForeignKey('questions.id_question')), 
                             db.Column('id_user',db.Integer,db.ForeignKey('users.id_user')),
                             db.Column('id_chosen_answer',db.Integer,db.ForeignKey('chosenAnswers.id_chosen_answer')),
                             db.Column('datetime_response', db.DateTime)
