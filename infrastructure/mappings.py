@@ -120,10 +120,11 @@ def init(db):
     )
     question_response_user_mapping = db.Table('questionsResponseUser',    
                             db.Column('id_question_response_user',db.Integer,primary_key=True,autoincrement=True), 
-                            db.Column('code_user_response',db.String(50),primary_key=True,unique=True),                             
+                            db.Column('code_user_response',db.String(50)),                             
                             db.Column('id_question',db.Integer,db.ForeignKey('questions.id_question')), 
                             db.Column('id_user',db.Integer,db.ForeignKey('users.id_user')),
                             db.Column('id_chosen_answer',db.Integer,db.ForeignKey('chosenAnswers.id_chosen_answer')),
+                            db.Column('id_field',db.Integer,db.ForeignKey('fields.id_field')),
                             db.Column('datetime_response', db.DateTime)
                             ) 
     report_mapping = db.Table('reports',

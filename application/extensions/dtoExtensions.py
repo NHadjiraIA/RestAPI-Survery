@@ -1,4 +1,6 @@
 
+from flask_mail import Message
+
 def questionResponsesToNextQuestionDto(questionResponseChoices):
   if questionResponseChoices.count() == 0:
     return None
@@ -17,6 +19,16 @@ def questionResponsesToNextQuestionDto(questionResponseChoices):
     "responseChoices": responseChoices
   }
   return nextQuestionDto
+########
+def questionResponsesToQuestionWithAnswerDto (responseQuestionsUserChosen):
+  if responseQuestionsUserChosen.count() == 0:
+    return None
+  questionWithAnswerDto = {
+    "id" : responseQuestionsUserChosen[0].id_chosen_answer,
+    "fieldId":responseQuestionsUserChosen[0].id_field
+  }
+
+  return questionWithAnswerDto  
 
 def questionResponsesOfUserDto(questionResponseChoicesReport):
   if questionResponseChoicesReport.count() == 0:

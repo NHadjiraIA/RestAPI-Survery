@@ -1,4 +1,4 @@
-from application.extensions.dtoExtensions import questionResponsesToNextQuestionDto, questionResponsesOfUserDto
+from application.extensions.dtoExtensions import questionResponsesToNextQuestionDto, questionResponsesOfUserDto, questionResponsesToQuestionWithAnswerDto
 from domain.entities.sub_question import SubQuestion
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
@@ -37,10 +37,9 @@ mail = Mail(app)
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
-# À lire :
 
 ################################################
-#				enpoint user
+#				endpoint user
 ################################################
 
 
@@ -77,6 +76,24 @@ def users():
         return jsonify(result)
     return  jsonify(), 204
 
+##############user by email
+@app.route('/api/v1/users', methods=['GET'])
+##@jwt_required()
+def usersByEmail():
+    email = request.args.get('email')
+    if email:
+        user = Context.user_repository.get_by_email(email)
+        if user:
+            return User_schema.dump(user)
+        else:
+            return jsonify(message='user not found'), 404
+
+    users_list = Context.user_repository.get_all()
+    result = Users_schema.dump(users_list)
+    if result:
+        return jsonify(result)
+    return  jsonify(), 204    
+
 ############## Add user######### 
 @app.route('/api/v1/users', methods=['POST'])
 def adduser():
@@ -105,15 +122,15 @@ def adduser():
 # #############update
 @app.route('/update_user', methods=['PUT'])
 def update_user():
-    id = int(request.form['id'])
+    id = int(request.form['id_user'])
     user = Context.user_repository.get_by_id(id)
 
     if user:
-        user.id = request.form['id']
-        user.first_name = request.form['first_name']
-        user.last_name = request.form['last_name']
-        user.email = request.form['email']
-        user.password = request.form['password']
+        user.id_user = request.form['id_user']
+        user.first_name_user = request.form['first_name_user']
+        user.last_name_user = request.form['last_name_user']
+        user.email_user = request.form['email_user']
+        user.password_user = request.form['password_user']
         Context.user_repository.Update(user)
         return jsonify(message="You updated a user"), 200
     else:
@@ -134,18 +151,24 @@ def removeuser():
  #############login
 @app.route('/login', methods=['POST'])
 def login():
-    if request.is_json:
-        email = request.json['email']
-        password = request.json['password']
+    body = request.json
+    if body:
+        email = body['email']
+        password = body['password']
     else:
         email = request.form['email']
         password = request.form['password']
     user = Context.user_repository.get_by_email(email)
-    if user:
+    if user:       
         access_token = create_access_token(identity=email)
-        return jsonify(message='login succeded !', access_token=access_token)
+        if (user.id_user):
+           if (password == user.password_user):
+               return jsonify(message='login succeded !' ,access_token=access_token,idUser=user.id_user)
+           else:
+               return jsonify(message='Bad email or password'), 401        
+                
     else:
-        return jsonify(message='Bad email or password'), 401
+        return jsonify(message="this user doesn't exist" ), 401
 
 
 ########
@@ -167,91 +190,9 @@ def retrieve_password():
 
 #
 
-################################################
-#				endpoint planet
-################################################
-
-
-##################### add planet################
-@app.route('/addplanet', methods=['POST'])
-def addplanet():
-    planet_name = request.form['planet_name']
-    if planet_name:
-        planet = Context.planet_repository.get_by_name(planet_name)
-        if planet:
-            return jsonify(message='That planet already exists.'), 409
-        else:
-            planet = Planet(planet_name=request.form['planet_name'],
-                            planet_type=request.form['planet_type'],
-                            home_star=request.form['home_star'],
-                            mass=request.form['mass'],
-                            radius=request.form['radius'],
-                            distance=request.form['distance'])
-            Context.planet_repository.create(planet)
-            planetadded = Context.planet_repository.get_by_name(planet_name)
-            if planetadded:
-                return jsonify(message='Planet created sucessfuly.'), 201
-            else:
-                return jsonify(message='We could not creat planet')
-    return jsonify(message='name is required'), 400
-
-
-
-
-
-#################search planets
-
-@app.route('/planets', methods=["GET"])
-def planets():
-    id = request.args.get('id')
-    print(id)
-    if id:
-        planet = Context.planet_repository.get_by_id(id)
-        if planet:
-            return Planet_schema.dump(planet)
-        else:
-            return jsonify(message='planet not found'), 404
-    else:
-        Planet_list = Context.planet_repository.get_all()
-        print(Planet_list)
-        result = Planets_schema.dump(Planet_list)
-        if result:
-            return jsonify(result)
-        return jsonify(), 204
-
-
-#################Update planet############     #--Context.planet_repository.delete(planet_id)
-
-@app.route('/update_planet', methods=['PUT'])
-def update_planet():
-    planet_id = int(request.form['planet_id'])
-    planet = Context.planet_repository.get_by_id(planet_id)
-
-    if planet:
-        planet.planet_name = request.form['planet_name']
-        planet.planet_type = request.form['planet_type']
-        planet.home_star = request.form['home_star']
-        planet.mass = float(request.form['mass'])
-        planet.radius = float(request.form['radius'])
-        planet.distance = float(request.form['distance'])
-        Context.planet_repository.Update(planet)
-        return jsonify(message="You updated a planet"), 200
-    else:
-        return jsonify(message="That planet does not exist"), 404
-
-######### delete planet
-
-@app.route('/remove_planet', methods=['DELETE'])
-def remove_planet():
-    planet_id = request.args.get('planet_id')
-    planet = Context.planet_repository.get_by_id(planet_id)
-    if planet:
-        deleted = Context.planet_repository.delete(planet_id)
-        return jsonify(message="You deleted a planet"), 200
-    else:
-        return jsonify(message="That planet does not exist"), 404
-
-###############Question 
+##############################################################
+#				endpoint Question
+##############################################################
 @app.route('/question', methods=["GET"])
 def question():
     id = request.args.get('id_question')
@@ -334,7 +275,9 @@ def previous_question():
             return jsonify(result)
         return jsonify(), 204    
 
-# ###############Fields
+##############################################################
+#				endpoint Field
+##############################################################
 @app.route('/fields', methods=["GET"])
 def field():
     id = request.args.get('id')
@@ -352,7 +295,11 @@ def field():
         if result:
             return jsonify(result)
         return jsonify(), 204
-# ############################ add response of user         
+
+# ##############################################################
+#				endpoint Response
+##############################################################
+#  ################ add response of user         
 @app.route('/api/v1/response/user', methods=['POST'])
 def responseuser():
     body = request.json
@@ -389,7 +336,82 @@ def responseuser():
             return jsonify(message="this question didn't exist in this field"), 400            
         return jsonify(message="field didn't exist"), 400
     return jsonify(message="user didn't exist"), 400
+######################delete response of user 
+@app.route('/api/v1/responses', methods=['DELETE'])
+def responseuserdelete():
+    userId = request.args.get('id_user')
+    questionId = request.args.get('id_question')
+    userAnswerCode = request.args.get('survery_answer_code')
+    currentresponseuser = Context.question_response_user_repository.get_response_by_user_survery(userId, questionId, userAnswerCode)
+    if currentresponseuser:
+        deleted = Context.question_response_user_repository.delete(userId, questionId, userAnswerCode)
+        if(deleted):
+            return jsonify(message="You deleted a response of user "), 200
+        return jsonify(message="Could not delete the response of the user"), 500
+    else:
+        return jsonify(message="That response does not exist"), 404
 
+######################delete response of user 
+@app.route('/api/v1/answers', methods=['DELETE'])
+def delete_answers_following_questionid():
+    questionId = request.args.get('questionId')
+    surveryCode = request.args.get('codeSurvery')
+    userId = request.args.get('userId')
+
+    questions = []
+    next_question_id = questionId
+    # create the list of questions to delete
+    while(True):
+        # get the answer from the user's answers
+        answer_dto = questionResponsesToQuestionWithAnswerDto(
+                                                              Context
+                                                              .question_response_user_repository
+                                                              .get_response_by_user_survery(userId, next_question_id, surveryCode)
+                                                              )
+        print('this is the result***************************************',answer_dto['id'])                                                      
+        # get the next question from the survery
+        next_question_dto = questionResponsesToNextQuestionDto(Context
+                                                               .sub_question_repository
+                                                               .get_by_question_response_chosed(next_question_id, answer_dto['id'], answer_dto['fieldId'])
+                                                              )
+        print('#########################################',next_question_dto)                                                      
+        if next_question_dto:
+            next_question_id = next_question_dto['id']
+            questions.append(next_question_dto['id'])
+        else:
+            break
+    # delete the list of questions    
+    if len(questions) > 0:
+        deleted = (Context
+                   .question_response_user_repository
+                   .delete_answers(questions, userId, surveryCode)
+                  )
+        if(deleted):
+            return jsonify(message=(f"All questions following the question : {questionId},"
+                                    f" for the surveryCode = {surveryCode} have been deleted")), 200
+        return jsonify(message="Could not delete the response of the user"), 500
+    else:
+        return jsonify(message="That response does not exist"), 404
+
+##       
+###### question of user with response chosen before 
+@app.route('/api/v1/questions/answered', methods=['GET'])
+def question_answered_already():
+    code_user_response = request.args.get('code_user_response')
+    userId = request.args.get('id_user')
+    questionId = request.args.get('id_question')
+
+    if code_user_response:
+        currentresponseuser = Context.question_response_user_repository.get_response_by_user_survery(userId, questionId, code_user_response)
+        print('this is the response of user in answered',currentresponseuser)
+        if currentresponseuser:
+            dto = questionResponsesToQuestionWithAnswerDto(currentresponseuser)
+            return jsonify(dto)
+        else:
+            return jsonify(message="the user didn't select a response for this question"), 404
+    else:
+        return jsonify(message="code_user_response is required !")    
+        
 # ##################display message report
 @app.route('/api/v1/raport/messages', methods=['GET'])
 def report_message():
@@ -412,6 +434,28 @@ def report_message():
         if result:
             return jsonify(result)
         return jsonify(), 204    
+################update response
+@app.route('/api/v1/raport/messages', methods=['PUT'])
+def update_response():
+    body = request.json
+    code_user_response = body['code_user_response']
+    userId = body['id_user']
+    questionId = body['id_question']
+    currentresponseuser = Context.question_response_user_repository.get_response_by_user_survery(userId, questionId, code_user_response)
+    print('this is response************************',currentresponseuser)
+    if currentresponseuser:
+        currentresponseuser[0].id_question = body['id_question']
+        currentresponseuser[0].id_user = body['id_user']
+        currentresponseuser[0].id_field = body['id_field']
+        currentresponseuser[0].id_chosen_answer = body['id_chosen_answer']
+        currentresponseuser[0].datetime_response = datetime.now()
+        currentresponseuser[0].code_user_response = body['code_user_response']
+        Context.question_response_user_repository.Update(currentresponseuser[0])
+        return jsonify(message="You updated a response"), 200
+    else:
+        return jsonify(message="That response does not exist"), 404        
+
+
 # batabase models
 class UserSchema(ma.Schema):
     class Meta:
@@ -430,7 +474,10 @@ class ExempleSchema(ma.Schema):
 
 class FieldSchema(ma.Schema):
     class Meta:
-        fields = ('id_field', 'name_field','id_question')        
+        fields = ('id_field', 'name_field','id_question')   
+class ResponseSelectedSchema(ma.Schema):
+    class Meta:
+        fields = ('id_chosen_answer','id_question')               
  
 # class QuestionFieldSchema(ma.Schema):
 #     class Meta:
@@ -500,6 +547,8 @@ QuestionDto_Schema =QuestionResponsesDtoSchema()
 SubQuestion_Schema = SubQuestionSchema()
 SubQuestions_Schema = SubQuestionSchema(many=True)
 Survey_Schema = SurveySechema(many=True)
+Responses_Selected_Schema = ResponseSelectedSchema(many=True)
+Response_Selected_Schema = ResponseSelectedSchema()
 
 if __name__ == '__main__':
     app.run()

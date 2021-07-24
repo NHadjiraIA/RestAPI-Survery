@@ -34,6 +34,3 @@ class QuestionRepository(repository_base.RepositoryBase):
             return self.session().query(Question).filter_by(content_question=content).one()
         except:
             return None
-            
-
-

@@ -1,5 +1,7 @@
+from sqlalchemy.sql.expression import false, true
 from domain.entities.user import User
 from infrastructure.repositories import repository_base
+from sqlalchemy import and_
 
 
 class UserRepository(repository_base.RepositoryBase):
@@ -25,7 +27,20 @@ class UserRepository(repository_base.RepositoryBase):
         except:
             return None
 
-
+    def get_id_user_by_email(self, email):
+        try:
+            return self.session().query(User.id_user, User.password_user).filter_by(email_user=email).one()
+        except:
+            return None
+    def get_user_by_email_and_password(self, email,password):
+        try:
+            result =  self.session().query(User).filter_by(and_(User.email_user==email, User.password_user==password)).one()
+            if (result):
+                return true
+            else:
+                return false    
+        except:
+            return None        
 
     def get_by_username(self, first_name):
         try:
