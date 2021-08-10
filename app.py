@@ -415,12 +415,13 @@ def question_answered_already():
 # ##################display message report
 @app.route('/api/v1/raport/messages', methods=['GET'])
 def report_message():
-    id_user = request.args.get('id_user')
-    id_field = request.args.get('id_field')
+    # id_user = request.args.get('id_user')
+    # id_field = request.args.get('id_field')
+    code_user_response   = request.args.get('code_user_response')
     
 
-    if id_user and id_field:
-        response = Context.question_response_user_repository.get_message_by_response_user(id_user,id_field)
+    if code_user_response:
+        response = Context.question_response_user_repository.get_message_by_response_user(code_user_response)
         print(response)
         if response:
             messageReportUserDto  = questionResponsesOfUserDto(response)
@@ -435,7 +436,7 @@ def report_message():
             return jsonify(result)
         return jsonify(), 204    
 ################update response
-@app.route('/api/v1/raport/messages', methods=['PUT'])
+@app.route('/api/v1/responses', methods=['PUT'])
 def update_response():
     body = request.json
     code_user_response = body['code_user_response']

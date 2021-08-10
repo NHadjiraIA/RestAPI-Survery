@@ -81,14 +81,14 @@ class QuestionResponseUserRepository(repository_base.RepositoryBase):
                
         except:
             return None        
-    def get_message_by_response_user(self, id_user,id_field):
+    def get_message_by_response_user(self, code_user_response):
         try:
             result = self.session().query(User.id_user, ChosenAnswer.id_chosen_answer, ChosenAnswer.id_response , ChosenAnswer.message, User.first_name_user,User.last_name_user,QuestionResponseUser.datetime_response,Field.name_field).distinct()\
                   .join(QuestionResponseUser, QuestionResponseUser.id_chosen_answer == ChosenAnswer.id_chosen_answer)\
                   .join(User, User.id_user == QuestionResponseUser.id_user )\
                   .join(SubQuestion, SubQuestion.id_question == QuestionResponseUser.id_question)\
                   .join(Field, Field.id_field == SubQuestion.id_field)\
-                  .filter(and_(User.id_user == id_user ,Field.id_field == id_field))\
+                  .filter(QuestionResponseUser.code_user_response == code_user_response)\
                   .group_by(QuestionResponseUser.id_question)
            
             return result
